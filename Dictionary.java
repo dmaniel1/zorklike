@@ -7,7 +7,7 @@ import zorklike.Item;
 public class Dictionary {
     private String[] roomNames;
     private String[] itemNames;
-    public static String[] actions = {"go","find","search","look","examine","take","grab","in","into","take","get","open","close","drop","foreward","front","right","left","back","backwards"};
+    public static String[] actions = {"go","find","search","look","examine","take","grab","in","into","take","get","open","close","drop","foreward","front","right","left","back","backwards","inventory"};
     public Dictionary() {
         roomNames = new String[Zorklike.rooms.size()];
         itemNames = new String[Zorklike.items.size()];

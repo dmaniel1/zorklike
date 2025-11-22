@@ -27,7 +27,6 @@ public class Zorklike {
 		rooms = new ArrayList<Room>();
 		items = new ArrayList<Item>();
 		scan = new Scanner(System.in);
-		dictionary = new Dictionary();
 		//create rooms
 		//testroom
 		String[] roomRq = {"axe","key"};
@@ -84,6 +83,8 @@ public class Zorklike {
 				//System.out.println("not created");
 			}
 		}
+		//init dictionary
+		dictionary = new Dictionary();
 		//game running
 		while (run) {
 			//input
@@ -93,7 +94,7 @@ public class Zorklike {
 			String object = null;
 			//target (usually not items)
 			String target = null;
-			System.out.print("type command \n> ");
+			System.out.print("I would like to ");
 			String input = scan.nextLine();
 			//split input and analyze
 			String[] stringify = input.split(" ");
@@ -107,13 +108,35 @@ public class Zorklike {
 					}
 				}
 				else if (action!=null && object==null && target==null) {
-					boolean checkRooms = dictionary.searchRooms(token);
-					boolean checkItems = dictionary.searchItems(token);
+					boolean checkRooms = dictionary.searchRooms(token.toLowerCase());
+					boolean checkItems = dictionary.searchItems(token.toLowerCase());
 					if (checkRooms) {
 						target=token;
+						break;
 					}
 					else if (checkItems) {
 						object=token;
+						break;
+					}
+					else if (token.equals("around")) {
+						target="around";
+						break;
+					}
+					else if (token.equals("foreward") || token.equals("front")) {
+						target="foreward";
+						break;
+					}
+					else if (token.equals("backwards") || token.equals("back")) {
+						target="backwards";
+						break;
+					}
+					else if (token.equals("left")) {
+						target="left";
+						break;
+					}
+					else if (token.equals("inventory")) {
+						target="inventory";
+						break;
 					}
 					else {
 						break;
@@ -121,35 +144,23 @@ public class Zorklike {
 				}
 			}
 			//response
-			if (input.equals("t")) {
-				System.out.println("correct");
-				boolean tryuse = curRoom.useItem("key");
-				boolean tryuse1 = curRoom.useItem("axe");
-				System.out.println(curRoom.getName());
-				if (tryuse) {
-					System.out.println("works");
-					curRoom.openClose();
-					System.out.println(curRoom.isOpen());
-				}
-			}
-			else if (input.equals("inv")) {
-				if (inventory.size() == 0) {
+			System.out.println(action);
+			System.out.println(target);
+			if (action.equals("inventory") || (action.equals("open") && target.equals("inventory"))) {
+				if (inventory.size()==0) {
 					System.out.println("Peeking into your backpack, you find nothing.");
 				}
 				else {
 					for (String item : inventory) {
-						System.out.println("A " + item);
+						String[] check = item.split("");
+						if (check[0].toLowerCase().equals("a") || check[0].toLowerCase().equals("e") || check[0].toLowerCase().equals("i") || check[0].toLowerCase().equals("o") || check[0].toLowerCase().equals("u")) {
+							System.out.println("An " + item);
+						}
+						else {
+							System.out.println("A " + item);
+						}
 					}
 				}
-			}
-			else if (input.equals("mv")) {
-				for (int i=0;i<rooms.size();i++) {
-					if (rooms.get(i).getName().equals("testroom2")) {
-						curRoom = rooms.get(i);
-						System.out.println(curRoom.getName());
-						break;
-					}
- 				}
 			}
 		}
 	}
