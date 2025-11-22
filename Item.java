@@ -1,6 +1,8 @@
 package zorklike;
 
 import zorklike.Zorklike;
+import java.util.Iterator;
+
 
 public class Item {
     private Zorklike.Type type;

@@ -10,10 +10,10 @@ public class Room {
     private String desc;
     private String extdesc;
     private String[] require;
-    private String[] connections;
+    private String[][] connections;
     private Object[/* number of items */][/* item metadata */] iteml;
     private boolean open;
-    public Room(String nm, String dc, String edc, String[] req, String[] connect, Object[][] itl, boolean op) {
+    public Room(String nm, String dc, String edc, String[] req, String[][] connect, Object[][] itl, boolean op) {
         name=nm;
         desc=dc;
         extdesc=edc;
@@ -43,7 +43,7 @@ public class Room {
     public String[] getRequirement() {
         return require;
     }
-    public String[] getConnections() {
+    public String[][] getConnections() {
         return connections;
     }
     public Object[][] getItemL() {
