@@ -27,6 +27,8 @@ public class Zorklike {
 		rooms = new ArrayList<Room>();
 		items = new ArrayList<Item>();
 		scan = new Scanner(System.in);
+		inventory.add("e");
+		inventory.add("haiii");
 		//create rooms
 		//testroom
 		String[] roomRq = {"axe","key"};
@@ -94,8 +96,9 @@ public class Zorklike {
 			String object = null;
 			//target (usually not items)
 			String target = null;
-			System.out.print("I would like to ");
+			System.out.print("> ");
 			String input = scan.nextLine();
+			input = input.toLowerCase();
 			//split input and analyze
 			String[] stringify = input.split(" ");
 			for (String token : stringify) {
@@ -112,55 +115,121 @@ public class Zorklike {
 					boolean checkItems = dictionary.searchItems(token.toLowerCase());
 					if (checkRooms) {
 						target=token;
-						break;
 					}
 					else if (checkItems) {
 						object=token;
-						break;
 					}
 					else if (token.equals("around")) {
 						target="around";
-						break;
 					}
-					else if (token.equals("foreward") || token.equals("front")) {
+					else if (token.equals("foreward") || token.equals("front") || token.equals("forewards")) {
 						target="foreward";
-						break;
 					}
-					else if (token.equals("backwards") || token.equals("back")) {
+					else if (token.equals("backward") || token.equals("back") || token.equals("backwards")) {
 						target="backwards";
-						break;
 					}
 					else if (token.equals("left")) {
 						target="left";
-						break;
+					}
+					else if (token.equals("right")) {
+						target="right";
 					}
 					else if (token.equals("inventory")) {
 						target="inventory";
-						break;
 					}
-					else {
-						break;
-					}
+					else {}
 				}
 			}
 			//response
-			System.out.println(action);
-			System.out.println(target);
-			if (action.equals("inventory") || (action.equals("open") && target.equals("inventory"))) {
-				if (inventory.size()==0) {
-					System.out.println("Peeking into your backpack, you find nothing.");
-				}
-				else {
-					for (String item : inventory) {
-						String[] check = item.split("");
-						if (check[0].toLowerCase().equals("a") || check[0].toLowerCase().equals("e") || check[0].toLowerCase().equals("i") || check[0].toLowerCase().equals("o") || check[0].toLowerCase().equals("u")) {
-							System.out.println("An " + item);
-						}
-						else {
-							System.out.println("A " + item);
+			System.out.println("action: " + action);
+			System.out.println("target: " + target);
+			System.out.println("object: " + object);
+			if (action!=null) {
+				if (action.equals("inventory") || (action.equals("open") && target.equals("inventory"))) {
+					if (inventory.size()==0) {
+						System.out.println("Peeking into your backpack, you find nothing.");
+					}
+					else {
+						for (String item : inventory) {
+							String[] check = item.split("");
+							if (check[0].toLowerCase().equals("a") || check[0].toLowerCase().equals("e") || check[0].toLowerCase().equals("i") || check[0].toLowerCase().equals("o") || check[0].toLowerCase().equals("u")) {
+								System.out.println("An " + item);
+							}
+							else {
+								System.out.println("A " + item);
+							}
 						}
 					}
+					action=null;
+					object=null;
+					target=null;
 				}
+				else {
+					if ((object==null && target!=null) || (object!=null && target==null)) {
+						for (String type : Dictionary.movement) {
+							if (action.equals(type)) {
+								if (object==null) {
+									System.out.println("You can't move to the " + target + ", silly.");
+								}
+								else if (target==null) {
+									System.out.println("You can't move to " + object + ", silly.");
+								}
+							}
+						}
+						for (String type : Dictionary.searching) {
+							if (action.equals(type)) {
+								System.out.println("You can't search for that object like that...");
+							}
+						}
+						for (String type : Dictionary.obtaining) {
+							if (action.equals(type)) {
+								if (object==null) {
+									String[] check = target.split("");
+									if (check[0].toLowerCase().equals("a") || check[0].toLowerCase().equals("e") || check[0].toLowerCase().equals("i") || check[0].toLowerCase().equals("o") || check[0].toLowerCase().equals("u")) {
+										System.out.println("You can't take an " + target + "...");
+									}
+									else {
+										System.out.println("You can't take a " + target + "...");
+									}
+								}
+								else if (target==null) {
+									System.out.println("You can't take the " + object + "...");
+								}
+							}
+						}
+						for (String type : Dictionary.objectInteraction) {
+							if (action.equals(type)) {
+								if (object==null) {
+									System.out.println("You can't interact with the " + target + " like that.");
+								}
+								else if (target==null) {
+									String[] check = target.split("");
+									if (check[0].toLowerCase().equals("a") || check[0].toLowerCase().equals("e") || check[0].toLowerCase().equals("i") || check[0].toLowerCase().equals("o") || check[0].toLowerCase().equals("u")) {
+										System.out.println("You can't interact with an " + object + " like that.");
+									}
+									else {
+										System.out.println("You can't interact with a " + object + " like that.");
+									}
+								}
+							}
+						}
+					}
+					else {
+						if (action.equals("go") || action.equals("move")) {
+							action = action + " to";
+						}
+						String[] upper = action.split("");
+						upper[0] = upper[0].toUpperCase();
+						String output = String.join("",upper);
+						System.out.println(output + " what, exactly?");
+					}
+					action=null;
+					object=null;
+					target=null;
+				}
+			}
+			else {
+				System.out.println("I'm not quite sure what \"" + input + "\" means. Sorry!");
 			}
 		}
 	}

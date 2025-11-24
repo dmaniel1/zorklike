@@ -7,24 +7,28 @@ import zorklike.Item;
 public class Dictionary {
     private String[] roomNames;
     private String[] itemNames;
-    public static String[] actions = {"go","find","search","look","examine","take","grab","in","into","take","get","open","close","drop","foreward","front","right","left","back","backwards","inventory"};
+    public static String[] actions = {"go","move","find","search","look","examine","take","grab","get","open","close","drop","foreward","front","forewards","right","left","back","backward","backwards","inventory"};
+	public static String[] movement = {"go","move","foreward","front","forewards","right","left","back","backward","backwards"};
+	public static String[] searching = {"find","search","look","examine"};
+	public static String[] obtaining = {"take","grab","get"};
+	public static String[] objectInteraction = {"open","close","search"};
+	public static String[] inventoryActions = {"drop","inventory"};
     public Dictionary() {
         roomNames = new String[Zorklike.rooms.size()];
         itemNames = new String[Zorklike.items.size()];
         for (int i=0;i<Zorklike.rooms.size();i++) {
             roomNames[i] = Zorklike.rooms.get(i).getName();
         }
-        for (int i=0;i<Zorklike.items.size();i++) {
-            itemNames[i] = Zorklike.items.get(i).getName();
-        }
-    }
-    public boolean searchRooms(String roomName) {
-        for (int i=0;i<roomNames.length;i++) {
-            if (roomNames[i].equals(roomName)) {
-                return true;
-            }
-            else {
-                return false;
+        for (int i=0;i<Zorklike.items.size();i++) { 
+			itemNames[i] = Zorklike.items.get(i).getName(); 
+		} 
+	} 
+	public boolean searchRooms(String roomName) { 
+		for (int i=0;i<roomNames.length;i++) { 
+			if (roomNames[i].equals(roomName)) { 
+				return true; 
+			} else { 
+				return false;
             }
         }
         return false;
