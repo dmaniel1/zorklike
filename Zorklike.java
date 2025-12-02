@@ -6,7 +6,10 @@ import zorklike.Dictionary;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Scanner;
+import java.util.HashMap;
 
 public class Zorklike {
 	//init variables
@@ -20,12 +23,18 @@ public class Zorklike {
 	public static List<String> inventory;
 	public static List<Room> rooms;
 	public static List<Item> items;
+	@FunctionalInterface
+	public static interface Command {
+		int command(String action, String object);
+	}
+	public static HashMap<String, Command> commandHashMap;
 	public static void main(String[] args) {
 		//declare init variables
 		boolean run = true;
 		inventory = new ArrayList<String>();
 		rooms = new ArrayList<Room>();
 		items = new ArrayList<Item>();
+		commandHashMap = new HashMap<String, Command>();
 		scan = new Scanner(System.in);
 		inventory.add("e");
 		inventory.add("haiii");
@@ -87,149 +96,179 @@ public class Zorklike {
 		}
 		//init dictionary
 		dictionary = new Dictionary();
+		List<String> movementL = Arrays.asList(Dictionary.directions);
+		//command and populate hashmap
+		Command checkInventory = (String target, String object) -> {
+			if (inventory.size()==0) {
+				System.out.println("Peeking into your backpack, you find nothing.");
+				return 0;
+			}
+			else {
+				System.out.println("You have a total of " + inventory.size() + " items in your backpack.");
+				int current = 1;
+				for (String item : inventory) {
+					String[] check = item.split("");
+					if (check[0].toLowerCase().equals("a") || check[0].toLowerCase().equals("e") || check[0].toLowerCase().equals("i") || check[0].toLowerCase().equals("o") || check[0].toLowerCase().equals("u")) {
+						System.out.println(current + ": An " + item);
+					}
+					else {
+						System.out.println(current + ": A " + item);
+					}
+					current++;
+				}
+				return 0;
+			}
+		};
+		commandHashMap.put("inventory",checkInventory);
+		Command checkItemList = (String target, String object) -> {
+			for (Item item : items) {
+				System.out.println(item.getName());
+			}
+			return 0;
+		};
+		commandHashMap.put("list",checkItemList);
 		//game running
 		while (run) {
 			//input
-			//action
+			// action
 			String action = null;
-			//object (will not be room; if action is go or forward or any movement verb, it will use target not object)
-			String object = null;
-			//target (usually not items)
+			// target (usually not items)
 			String target = null;
+			// object (will not be room; if action is go or forward or any movement verb, it will use target not object)
+			String object = null;
 			System.out.print("> ");
 			String input = scan.nextLine();
 			input = input.toLowerCase();
-			//split input and analyze
+			// parser logic
 			String[] stringify = input.split(" ");
-			for (String token : stringify) {
-				if (action==null) {
-					for (int i=0;i<Dictionary.actions.length;i++) {
-						if (token.equals(Dictionary.actions[i])) {
-							action = token;
-							break;
-						}
+			ArrayList<String> tokenized = new ArrayList<String>(Arrays.asList(stringify));
+			// delete action and all words before action after setting action
+			int index = -1;
+			for (int i=0;i<tokenized.size();i++) {
+				String token = tokenized.get(i);
+				for (String verb : Dictionary.actions) {
+					if (token.equalsIgnoreCase(verb)) {
+						action = token;
+						index = i;
+						break;
 					}
 				}
-				else if (action!=null && object==null && target==null) {
-					boolean checkRooms = dictionary.searchRooms(token.toLowerCase());
-					boolean checkItems = dictionary.searchItems(token.toLowerCase());
-					if (checkRooms) {
-						target=token;
-					}
-					else if (checkItems) {
-						object=token;
-					}
-					else if (token.equals("around")) {
-						target="around";
-					}
-					else if (token.equals("foreward") || token.equals("front") || token.equals("forewards")) {
-						target="foreward";
-					}
-					else if (token.equals("backward") || token.equals("back") || token.equals("backwards")) {
-						target="backwards";
-					}
-					else if (token.equals("left")) {
-						target="left";
-					}
-					else if (token.equals("right")) {
-						target="right";
-					}
-					else if (token.equals("inventory")) {
-						target="inventory";
-					}
-					else {}
-				}
+				if (index!=-1) break;
 			}
-			//response
-			System.out.println("action: " + action);
-			System.out.println("target: " + target);
-			System.out.println("object: " + object);
 			if (action!=null) {
-				if (action.equals("inventory") || (action.equals("open") && target.equals("inventory"))) {
-					if (inventory.size()==0) {
-						System.out.println("Peeking into your backpack, you find nothing.");
-					}
-					else {
-						for (String item : inventory) {
-							String[] check = item.split("");
-							if (check[0].toLowerCase().equals("a") || check[0].toLowerCase().equals("e") || check[0].toLowerCase().equals("i") || check[0].toLowerCase().equals("o") || check[0].toLowerCase().equals("u")) {
-								System.out.println("An " + item);
-							}
-							else {
-								System.out.println("A " + item);
-							}
+				// remove unneccessary words
+				for (int i=0;i<tokenized.size();i++) {
+					String token = tokenized.get(i);
+					for (String item : Dictionary.useless) {
+						if (token.equals(item)) {
+							tokenized.remove(i);
 						}
 					}
-					action=null;
-					object=null;
-					target=null;
+				}
+
+				if (index==-1) {
+					System.out.println("PARSING ERROR: ERROR CODE: 0");
 				}
 				else {
-					if ((object==null && target!=null) || (object!=null && target==null)) {
-						for (String type : Dictionary.movement) {
-							if (action.equals(type)) {
-								if (object==null) {
-									System.out.println("You can't move to the " + target + ", silly.");
-								}
-								else if (target==null) {
-									System.out.println("You can't move to " + object + ", silly.");
-								}
-							}
+					tokenized.subList(0,index+1).clear();
+				}
+				boolean objAndTarg = false;
+				for (String item : tokenized) {
+					for (String compare : Dictionary.splitters) {
+						if (item.equals(compare)) {
+							objAndTarg = true;
 						}
-						for (String type : Dictionary.searching) {
-							if (action.equals(type)) {
-								System.out.println("You can't search for that object like that...");
-							}
-						}
-						for (String type : Dictionary.obtaining) {
-							if (action.equals(type)) {
-								if (object==null) {
-									String[] check = target.split("");
-									if (check[0].toLowerCase().equals("a") || check[0].toLowerCase().equals("e") || check[0].toLowerCase().equals("i") || check[0].toLowerCase().equals("o") || check[0].toLowerCase().equals("u")) {
-										System.out.println("You can't take an " + target + "...");
-									}
-									else {
-										System.out.println("You can't take a " + target + "...");
-									}
+					}
+				}
+				if (objAndTarg) {
+					ArrayList<String> targetList = new ArrayList<String>();
+					ArrayList<String> objectList= new ArrayList<String>();
+					boolean targl = true;
+					if (targl) {
+						for (int i=0;i<tokenized.size();i++) {
+							String item = tokenized.get(i);
+							for (String compare : Dictionary.splitters) {
+								if (!item.equals(compare)) {
+									targetList.add(item);
+									tokenized.remove(i);
 								}
-								else if (target==null) {
-									System.out.println("You can't take the " + object + "...");
-								}
-							}
-						}
-						for (String type : Dictionary.objectInteraction) {
-							if (action.equals(type)) {
-								if (object==null) {
-									System.out.println("You can't interact with the " + target + " like that.");
-								}
-								else if (target==null) {
-									String[] check = target.split("");
-									if (check[0].toLowerCase().equals("a") || check[0].toLowerCase().equals("e") || check[0].toLowerCase().equals("i") || check[0].toLowerCase().equals("o") || check[0].toLowerCase().equals("u")) {
-										System.out.println("You can't interact with an " + object + " like that.");
-									}
-									else {
-										System.out.println("You can't interact with a " + object + " like that.");
-									}
+								else {
+									targl = false;
+									tokenized.remove(i);
 								}
 							}
 						}
 					}
 					else {
-						if (action.equals("go") || action.equals("move")) {
-							action = action + " to";
+						for (int i=0;i<tokenized.size();i++) {
+							String item = tokenized.get(i);
+							objectList.add(item);
+							tokenized.remove(i);
 						}
-						String[] upper = action.split("");
-						upper[0] = upper[0].toUpperCase();
-						String output = String.join("",upper);
-						System.out.println(output + " what, exactly?");
 					}
-					action=null;
-					object=null;
-					target=null;
+					String targetListString = String.join(" ",targetList);
+					String objectListString = String.join(" ",objectList);
+					target = targetListString;
+					object = objectListString;
 				}
+				else {
+					ArrayList<String> tokenList = new ArrayList<String>();
+					for (String token : tokenized) {
+						tokenList.add(token);
+					}
+					String token = String.join(" ",tokenList);
+					System.out.println(token);
+					boolean checkRooms = dictionary.searchRooms(token.toLowerCase());
+					boolean checkItems = dictionary.searchItems(token.toLowerCase());
+					System.out.println("checkRooms: " + checkRooms);
+					System.out.println("checkItems: " + checkItems);
+
+					if (checkRooms) {
+						target = token;
+					}
+					else if (checkItems) {
+						object = token;
+					}
+					else if (token.equals("around")) {
+						action = "around";
+					}
+					else if (token.equals("foreward") || token.equals("front") || token.equals("forewards")) {
+						action = "forewards";
+					}
+					else if (token.equals("backward") || token.equals("back") || token.equals("backwards")) {
+						action = "backwards";
+					}
+					else if (token.equals("left")) {
+						action = "left";
+					}
+					else if (token.equals("right")) {
+						action = "right";
+					}
+					else if (token.equals("inventory")) {
+						action = "inventory";
+					}
+					else if (token.equals("backpack")) {
+						action = "inventory";
+					}
+				}
+				if (action.equals("foreward") || action.equals("front") || action.equals("forewards")) {
+					action = "forewards";
+				}
+				else if (action.equals("backward") || action.equals("back") || action.equals("backwards")) {
+					action = "backwards";
+				}
+				else if (action.equals("backpack")) {
+					action = "inventory";
+				}
+				//response
+				// debug
+				System.out.println("action: " + action);
+				System.out.println("target: " + target);
+				System.out.println("object: " + object);
+				commandHashMap.get(action).command(target,object);
 			}
 			else {
-				System.out.println("I'm not quite sure what \"" + input + "\" means. Sorry!");
+				System.out.println("Sorry, not quite sure what \"" + input + "\" means. Try again?");
 			}
 		}
 	}

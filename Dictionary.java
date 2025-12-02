@@ -7,8 +7,11 @@ import zorklike.Item;
 public class Dictionary {
     private String[] roomNames;
     private String[] itemNames;
-    public static String[] actions = {"go","move","find","search","look","examine","take","grab","get","open","close","drop","foreward","front","forewards","right","left","back","backward","backwards","inventory"};
+    public static String[] actions = {"list","go","move","find","search","look","examine","take","grab","get","open","close","drop","foreward","front","forewards","right","left","back","backward","backwards","inventory","backpack","around"};
+    public static String[] useless = {"to","an","a","me","my","i","your","you","the","mine","at"};
+    public static String[] splitters = {"with"};
 	public static String[] movement = {"go","move","foreward","front","forewards","right","left","back","backward","backwards"};
+    public static String[] directions = {"foreward","forewards","front","right","left","backward","backwards","back"};
 	public static String[] searching = {"find","search","look","examine"};
 	public static String[] obtaining = {"take","grab","get"};
 	public static String[] objectInteraction = {"open","close","search"};
@@ -20,26 +23,21 @@ public class Dictionary {
             roomNames[i] = Zorklike.rooms.get(i).getName();
         }
         for (int i=0;i<Zorklike.items.size();i++) { 
-			itemNames[i] = Zorklike.items.get(i).getName(); 
+			itemNames[i] = Zorklike.items.get(i).getName();
 		} 
 	} 
 	public boolean searchRooms(String roomName) { 
 		for (int i=0;i<roomNames.length;i++) { 
 			if (roomNames[i].equals(roomName)) { 
 				return true; 
-			} else { 
-				return false;
-            }
+			} else {}
         }
         return false;
     }
     public boolean searchItems(String itemName) {
         for (int i=0;i<itemNames.length;i++) {
-            if (itemNames[i].equals(itemName)) {
+            if (itemName.equals(itemNames[i])) {
                 return true;
-            }
-            else {
-                return false;
             }
         }
         return false;
