@@ -15,7 +15,7 @@ public class Zorklike {
 	//init variables
 	static Scanner scan;
 	static Dictionary dictionary;
-	static enum Type{
+a	static enum Type {
         KEY,
         CD,
         WEAPON
