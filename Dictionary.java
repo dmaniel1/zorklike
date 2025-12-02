@@ -36,12 +36,9 @@ public class Dictionary {
     }
     public boolean searchItems(String itemName) {
         for (int i=0;i<itemNames.length;i++) {
-            String[] save = itemNames[i].split(" ");
-            int max = save.length-1;
-            if (save[max].equals(itemName)) {
+            if (itemName.equals(itemNames[i])) {
                 return true;
             }
-            else {}
         }
         return false;
     }
