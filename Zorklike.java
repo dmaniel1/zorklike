@@ -3,6 +3,7 @@ package zorklike;
 //import statements
 import zorklike.Room;
 import zorklike.Dictionary;
+import zorklike.Connection;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,14 +16,13 @@ public class Zorklike {
 	//init variables
 	static Scanner scan;
 	static Dictionary dictionary;
-a	static enum Type {
+	static enum Type {
         KEY,
         CD,
         WEAPON
     };
-	public static List<String> inventory;
+	public static List<Item> inventory;
 	public static List<Room> rooms;
-	public static List<Item> items;
 	@FunctionalInterface
 	public static interface Command {
 		int command(String action, String object);
@@ -31,73 +31,37 @@ a	static enum Type {
 	public static void main(String[] args) {
 		//declare init variables
 		boolean run = true;
-		inventory = new ArrayList<String>();
+		inventory = new ArrayList<Item>();
 		rooms = new ArrayList<Room>();
-		items = new ArrayList<Item>();
 		commandHashMap = new HashMap<String, Command>();
 		scan = new Scanner(System.in);
-		inventory.add("e");
-		inventory.add("haiii");
 		//create rooms
-		//testroom
-		String[] roomRq = {"axe","key"};
-		String[][] roomCn = {
-			{"front","testroom2"},
-			{"right","testroom3"}
-		};
-		Object[][] roomIt = {
-			{Type.KEY,"key","A simple key.",true,0,0,null},
-			{Type.WEAPON,"axe","A fireaxe.",true,10,100,null}
-		};
-		rooms.add(new Room("testroom","test room","in front of you, testroom2, to your right, testroom3",roomRq,roomCn,roomIt,false));
+
+		//testroom (requires key and axe from all connections)
+		rooms.add(new Room("testroom","test room","its testroom oh yeah",new Connection("front","testroom2",true),new Connection("right","testroom3",true)));
+		//testroom items
+		rooms.get(0).addItems(new Item(Type.KEY,"key","A simple key.",true,0,0,null),new Item(Type.WEAPON,"axe","A fireaxe.",true,10,100,null));
+		// in front of you, testroom2, to your right, testroom3
+
 		//testroom2
-		String[] testRq = null;
-		String[][] testCn = {
-			{"back","testroom"}
-		};
-		Object[][] testIt = null;
-		rooms.add(new Room("testroom2","testing room travel","behind you, testroom",testRq,testCn,testIt,true));
+		rooms.add(new Room("testroom2","testing room travel","yuhhhh",new Connection("back","testroom",true,"key","axe")));
+		//testroom2 items
+		rooms.get(1).addItems();
+		// behind you, testroom
+
 		//testroom3
-		String[] tRq = null;
-		String[][] tCn = {
-			{"left","testroom"}
-		};
-		Object[][] tIt = {
-			{Type.CD,"flash drive","A small red 16gb flash drive",true,0,0,"123.CMD"}
-		};
-		rooms.add(new Room("testroom3","testing room travel","to your right, testroom",tRq,tCn,tIt,true));
+		rooms.add(new Room("testroom3","testing room travel","yuh its testroom3", new Connection("right","testroom",true)));
+		rooms.get(2).addItems(new Item(Type.CD,"flash drive","A small red 16gb flash drive",true,0,0,"123.cmd"));
+
 		//current room variable (for travel)
 		Room curRoom = rooms.get(0);
-		//creating items
-		for (int i=0;i<rooms.size();i++) {
-			if (rooms.get(i).getItemL()!=null) {
-				Type type;
-				String name;
-				String description;
-				boolean obtainable;
-				int damage;
-				int durability;
-				String file;
-				Object[][] itemstocreate = rooms.get(i).getItemL();
-				for (int x=0;x<itemstocreate.length;x++) {
-					type=(Type)itemstocreate[x][0];
-					name=(String)itemstocreate[x][1];
-					description=(String)itemstocreate[x][2];
-					obtainable=(boolean)itemstocreate[x][3];
-					damage=(int)itemstocreate[x][4];
-					durability=(int)itemstocreate[x][5];
-					file=(String)itemstocreate[x][6];
-					items.add(new Item(type,name,description,obtainable,damage,durability,file));
-				}
-			}
-			else {
-				//System.out.println("not created");
-			}
-		}
+
 		//init dictionary
 		dictionary = new Dictionary();
 		List<String> movementL = Arrays.asList(Dictionary.directions);
+		
 		//command and populate hashmap
+		//inventory
 		Command checkInventory = (String target, String object) -> {
 			if (inventory.size()==0) {
 				System.out.println("Peeking into your backpack, you find nothing.");
@@ -106,13 +70,13 @@ a	static enum Type {
 			else {
 				System.out.println("You have a total of " + inventory.size() + " items in your backpack.");
 				int current = 1;
-				for (String item : inventory) {
-					String[] check = item.split("");
+				for (Item item : inventory) {
+					String[] check = item.getName().split("");
 					if (check[0].toLowerCase().equals("a") || check[0].toLowerCase().equals("e") || check[0].toLowerCase().equals("i") || check[0].toLowerCase().equals("o") || check[0].toLowerCase().equals("u")) {
-						System.out.println(current + ": An " + item);
+						System.out.println(current + ": An " + item.getName());
 					}
 					else {
-						System.out.println(current + ": A " + item);
+						System.out.println(current + ": A " + item.getName());
 					}
 					current++;
 				}
@@ -120,13 +84,42 @@ a	static enum Type {
 			}
 		};
 		commandHashMap.put("inventory",checkInventory);
+		
+		//check items
 		Command checkItemList = (String target, String object) -> {
-			for (Item item : items) {
-				System.out.println(item.getName());
+			for (String itemName : dictionary.getItemNames()) {
+				System.out.println(itemName);
 			}
 			return 0;
 		};
 		commandHashMap.put("list",checkItemList);
+
+		//look around
+		Command lookAround = (String object, String target) -> {
+			String[] name = curRoom.getName().split("");
+			name[0]=name[0].toUpperCase();
+			String nameCap = String.join("",name);
+			System.out.println("You look around the " + nameCap + " and see:");
+			Item[] curItems = curRoom.getItemL();
+			if (curItems.length==0) {
+				System.out.println("Nothing...");
+				return 0;
+			}
+			else {
+				for (Item item : curItems) {
+					String[] check = item.getName().split("");
+					if (check[0].equalsIgnoreCase("a") || check[0].equalsIgnoreCase("e") || check[0].equalsIgnoreCase("i") || check[0].equalsIgnoreCase("o") || check[0].equalsIgnoreCase("u"))  {
+						System.out.println("An " + item.getName());
+					}
+					else {
+						System.out.println("A " + item.getName());
+					}
+				}
+				return 0;
+			}
+		};
+		commandHashMap.put("around",lookAround);
+		
 		//game running
 		while (run) {
 			//input
