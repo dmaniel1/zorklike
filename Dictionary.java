@@ -10,8 +10,8 @@ public class Dictionary {
     private String[] roomNames;
     private String[] itemNames;
     private String[] furnNames;
-    public static String[] actions = {"peer","list","go","move","find","search","look","examine","take","grab","get","open","close","drop","foreward","front","forewards","right","left","back","backward","backwards","inventory","backpack","around","use","xyzzy"};
-    public static String[] useless = {"into","to","an","a","me","my","i","your","you","the","mine","at","0"};
+    public static String[] actions = {"peer","list","go","move","find","search","look","examine","take","grab","get","unlock","open","close","drop","foreward","front","forewards","right","left","back","backward","backwards","inventory","backpack","around","use","xyzzy"};
+    public static String[] useless = {"into","to","an","a","me","my","i","your","you","the","mine","at","the"};
     public static String[] splitters = {"with","in","inside","into","on","onto","off"};
     public static String[] flags = {"and",",","all"};
 	public static String[] movement = {"go","move","foreward","front","forewards","right","left","back","backward","backwards"};
@@ -50,7 +50,7 @@ public class Dictionary {
                 fmax += furnl.size();
             }
         }
-        furnNames = new String[max];
+        furnNames = new String[fmax];
         int y = 0;
         for (Room room : Zorklike.rooms) {
             List<Furniture> furnl = room.getFurnL();
@@ -64,15 +64,15 @@ public class Dictionary {
 	} 
 	public boolean searchRooms(String roomName) { 
 		for (int i=0;i<roomNames.length;i++) { 
-			if (roomNames[i].equals(roomName)) { 
+			if (roomName.contains(roomNames[i])) { 
 				return true; 
-			} else {}
+			}
         }
         return false;
     }
     public boolean searchItems(String itemName) {
         for (int i=0;i<itemNames.length;i++) {
-            if (itemName.equals(itemNames[i])) {
+            if (itemName.contains(itemNames[i])) {
                 return true;
             }
         }
@@ -80,7 +80,7 @@ public class Dictionary {
     }
     public boolean searchFurniture(String furnName) {
         for (int i=0;i<furnNames.length;i++) {
-            if (furnName.equals(furnNames[i])) {
+            if (furnName.contains(furnNames[i])) {
                 return true;
             }
         }

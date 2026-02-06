@@ -14,7 +14,7 @@ public class Connection {
         side=sd;
         room=rm;
         open=op;
-        requirements= new ArrayList<String>(Arrays.asList(req));
+        requirements=new ArrayList<String>(Arrays.asList(req));
     }
     public Connection(String sd, String rm, boolean op) {
         side=sd;

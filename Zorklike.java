@@ -1,7 +1,8 @@
 package zorklike;
 
 //make open command open things, make locked furniture not tell you whats in them, and get locked rooms working properly
-//search functions dont work for single words in furniture names (i.e. wooden table returns wooden table but table returns null) whatever man fuck this ion wanan fix that
+//search functions dont work for single words in furniture names (i.e. wooden table returns wooden table but table returns null) whatever man fuck this ion wanan fix that 
+//update: it is now fixed :D. only issue is uhhhhhhhh well the parser recognizes the words but the commands dont :/... still progress tho!!!!
 
 //import statements
 import zorklike.Room;
@@ -59,7 +60,7 @@ public class Zorklike {
 		//create rooms
 
 		//testroom (requires key and axe from all connections)
-		rooms.add(new Room("testroom","test room","its testroom oh yeah",new Connection("front","testroom2",true),new Connection("right","testroom3",true)));
+		rooms.add(new Room("testroom","test room","its testroom oh yeah",new Connection("front","testroom2",false,"key"),new Connection("right","testroom3",true)));
 		//testroom items
 		rooms.get(0).addFurniture(new Furniture("table","wooden table", "A wooden table stands in the corner",false,true,new Item(Type.KEY,"key","simple key","A small silver key. It feels cold to the touch.",true,0,0,null),new Item(Type.WEAPON,"axe","fireaxe","A hefty red and yellow axe similar to those that the local fire department uses. How did this end up here?",true,10,100,null)));
 		// in front of you, testroom2, to your right, testroom3
@@ -393,6 +394,13 @@ public class Zorklike {
 			return 0;
 		};
 		commandHashMap.put("find",find);
+
+		//open/unlocking
+		Command open = (String action, String object, String target) -> {
+
+			return 0;
+		};
+
 		//game running
 		while (run) {
 			//input
@@ -487,6 +495,10 @@ public class Zorklike {
 						tokenList.add(token);
 					}
 					String token = String.join(" ",tokenList);
+					System.out.println("token: " + token);
+					if (token.contains("door")) {
+						System.out.println("hi");
+					}
 					boolean checkRooms = dictionary.searchRooms(token.toLowerCase());
 					boolean checkItems = dictionary.searchItems(token.toLowerCase());
 					boolean checkFurniture = dictionary.searchFurniture(token.toLowerCase());
