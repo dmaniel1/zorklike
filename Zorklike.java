@@ -57,6 +57,7 @@ public class Zorklike {
 		// \\b is a regex word boundary
 		// Pattern.CASE_INSENSITIVE makes it not case sensitive
 		Pattern pattern = Pattern.compile("\\b" + Pattern.quote(word) + "\\b",Pattern.CASE_INSENSITIVE);
+		System.out.println("main="+mainStr+"\npattern="+pattern+"\n");
 		Matcher matcher = pattern.matcher(mainStr);
 		return matcher.find();
 	}
@@ -165,7 +166,7 @@ public class Zorklike {
 					}
 				}
 			}
-			System.out.println("This room you speak of... uh... it doesn't exist.");
+			System.out.println("Nuh uh");
 			return 0;
 		};
 		commandHashMap.put("go",moveRooms);
@@ -266,18 +267,17 @@ public class Zorklike {
 		//grabbing items
 		Command grabItem = (String action, String object, String target) -> {
 			List<Furniture> furnl = curRoom[0].getFurnL();
-			Iterator<Furniture> iterate = furnl.iterator();
-			while (iterate.hasNext()) {
-				Furniture curfurn = iterate.next();
+			for (int x=0;x<furnl.size();x++) {
+				Furniture curfurn = furnl.get(x);
 				List<Item> iteml = curfurn.getItemL();
 				List<String> requirements = curfurn.getRequirements();
-				Iterator<Item> iterate2 = iteml.iterator();
 				if (requirements==null) {
-					while (iterate2.hasNext()) {
-						Item item = iterate2.next();
+					for (int i=0;i<iteml.size();i++) {
+						Item item = iteml.get(i);
 						if (containsExactWord(object,item.getName()) || containsExactWord(target,item.getName())) {
 							inventory.add(item);
-							iterate2.remove();
+							curfurn.getItemL().remove(i);
+							i--;
 							System.out.println("You grab the " + item.getName() + " and put it into your backpack.");
 							return 0;
 						}
@@ -298,16 +298,14 @@ public class Zorklike {
 		Command examine = (String action, String object, String target) -> {
 			if (!(target==null && object==null)) {
 				if (target==null) {
-					boolean none = false;
 					for (Item item : inventory) {
 						if (containsExactWord(object,item.getName())) {
 							System.out.println(item.getExtendedDescription());
-							none = true;
+							return 0;
 						}
 					}
-					if (none) {
-						System.out.println("That item isn't in your inventory... Sorry!");
-					}
+					System.out.println("That item isn't in your inventory... Sorry!");
+					
 				}
 				else if (target!=null) {
 					boolean checkRooms = dictionary.searchRooms(target.toLowerCase());
@@ -633,6 +631,9 @@ public class Zorklike {
 				System.out.println("action: " + action);
 				System.out.println("target: " + target);
 				System.out.println("object: " + object);
+				for (String item : dictionary.getItemNames()) {
+					System.out.println(item);
+				}
 				//command
 				commandHashMap.get(action).command(action,object,target);
 			}
