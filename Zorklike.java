@@ -474,6 +474,31 @@ public class Zorklike {
 										}
 									}
 								}
+								if (reqItems.size()==0) {
+									System.out.println("You don't have the necessary items to open this door. LOOOOOOOSERRRRRR!!!!");
+									return 0;
+								}
+								else {
+									System.out.println("The items in your inventory that match the requirements for opening this door are:");
+									int i = 0;
+									for (String item : reqItems) {
+										i++;
+										System.out.println("    " + boldBlueColor + i + ": " + resetFormatting + item);
+									}
+									System.out.println("Would you like to use these items to open the door? [y/n]");
+									String input = scan.nextLine();
+									if (input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes")) {
+										for (String item : reqItems) {
+											connection.useItem(item);
+										}
+										System.out.println("You used the items. The door is now open.");
+										return 0;
+									}
+									else {
+										System.out.println("You don't use the items. The door remains closed.");
+										return 0;
+									}
+								}
 								return 0;
 							}
 						}
@@ -482,6 +507,23 @@ public class Zorklike {
 			}
 			else {
 				//furniture unlocking
+				List<Furniture> furnl = curRoom[0].getFurnL();
+				for (Furniture furn : furnl) {
+					if (containsExactWord(openable, furn.getName())) {
+						if (!furn.isOpen()) {
+							if (unlocker!=null) {
+								//if user specifies what to use to open the furniture
+								boolean itemInInv = false;
+								for (Item item : inventory) {
+									if (containsExactWord(unlocker,item.getname())) {
+										itemInInv = true;
+										//finish ts
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 			
 			System.out.println("Sorry, I'm not quite sure what you're trying to open.");
@@ -619,6 +661,11 @@ public class Zorklike {
 					}
 					else if (token.equalsIgnoreCase("door")) {
 						target = "door";
+					}
+					else if (token.equalsIgnoreCase("backpack")) {
+						action = "backpack";
+						object = null;
+						target = null;
 					}
 				}
 
