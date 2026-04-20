@@ -52,19 +52,21 @@ public class Furniture {
         }
         return this;
     }
-    public void removeItem(Item item) {
+    public void removeItem(String item) {
         if (iteml.contains(item)) {
             iteml.remove(item);
         }
     }
-    public void useItem(Item item) {
-        if (requirements.contains(item.getName())) {
-            requirements.remove(item.getName());
+    public boolean useItem(String item) {
+        if (requirements.contains(item)) {
+            requirements.remove(item);
+            return true;
         }
         if (requirements.size()<=0) {
             requirements=null;
             isOpen=true;
         }
+        return false;
     }
     public String getName() {
         return name;
@@ -82,8 +84,10 @@ public class Furniture {
         return isOpen;
     }
     public List<Item> getItemL() {
-        if (iteml.size() == 0) {
-            iteml = null;
+        if (iteml != null) {
+            if (iteml.size() == 0) {
+                iteml = null;
+            }
         }
         return iteml;
     }

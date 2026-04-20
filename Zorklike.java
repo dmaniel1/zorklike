@@ -82,7 +82,7 @@ public class Zorklike {
 		//testroom2
 		rooms.add(new Room("testroom2","testing room travel","yuhhhh",new Connection("back","testroom",true,"key","axe")));
 		//testroom2 items
-		rooms.get(1).addFurniture(new Furniture("metal chest","a metal chest","A locked iron chest sits in the center of the room",true,false,new Item(Type.RANDOM,"lint","ball of lint","A ball of lint",false,0,0,null)).addRequirements("gray"));
+		rooms.get(1).addFurniture(new Furniture("metal chest","a metal chest","A locked iron chest sits in the center of the room. You need the color gray to unlock this.",true,false,new Item(Type.RANDOM,"lint","ball of lint","A ball of lint",false,0,0,null)).addRequirements("gray"));
 		
 		// behind you, testroom
 
@@ -485,7 +485,7 @@ public class Zorklike {
 										i++;
 										System.out.println("    " + boldBlueColor + i + ": " + resetFormatting + item);
 									}
-									System.out.println("Would you like to use these items to open the door? [y/n]");
+									System.out.print("Would you like to use these items to open the door? [y/n]");
 									String input = scan.nextLine();
 									if (input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes")) {
 										for (String item : reqItems) {
@@ -499,7 +499,6 @@ public class Zorklike {
 										return 0;
 									}
 								}
-								return 0;
 							}
 						}
 					}
@@ -515,9 +514,55 @@ public class Zorklike {
 								//if user specifies what to use to open the furniture
 								boolean itemInInv = false;
 								for (Item item : inventory) {
-									if (containsExactWord(unlocker,item.getname())) {
+									if (containsExactWord(unlocker,item.getName())) {
 										itemInInv = true;
-										//finish ts
+										System.out.println(unlocker);
+										if (furn.useItem(unlocker)) {
+											System.out.print("You successfully used the " + unlocker + ".");
+											if (furn.getRequirements().size()!=0) {
+												System.out.println("\nThis " + furn.getName() + " still needs the following items to open:");
+												for (String requirement : furn.getRequirements()) {
+													System.out.println(requirement);
+												}
+											}
+											else {
+												System.out.println(" The " + furn.getName() + " is now open.");
+											}
+											return 0;
+										}
+										else {
+											System.out.println("You can't use that item in that way.");
+											return 0;
+										}
+									}
+								}
+								if (!itemInInv) {
+									System.out.println("You search through your backpack for that item, but you cannot find it.");
+									return 0;
+								}
+							}
+							else {
+								List<String> reqItems = new ArrayList<String>();
+								for (Item item : inventory) {
+									for (String requirement : furn.getRequirements()) {
+										if (item.getName().equalsIgnoreCase(requirement)) {
+											reqItems.add(item.getName());
+										}
+									}
+									if (reqItems.size()==0) {
+										System.out.println("You don't have the necessary items to open this " + furn.getName() + ". LOOOOOOOSERRRRRR!!!!");
+										return 0;
+									}
+									else {
+										System.out.println("The items in your inventory that match the requirements for opening this " + furn.getName() + " are:");
+										int i = 0;
+										for (String item : reqItems) {
+											i++;
+											System.out.println("    " + boldBlueColor + i + ": " + resetFormatting + item);
+										}
+										System.out.print("Would you like to use these items to open the " + furn.getName() + "? [y/n]");
+										String input = scan.nextLine();
+										//continue here
 									}
 								}
 							}
