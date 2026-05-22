@@ -60,6 +60,10 @@ public class Furniture {
     public boolean useItem(String item) {
         if (requirements.contains(item)) {
             requirements.remove(item);
+            if (requirements.size()<=0) {
+                requirements=null;
+                isOpen=true;
+            }
             return true;
         }
         if (requirements.size()<=0) {

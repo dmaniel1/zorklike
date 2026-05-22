@@ -86,21 +86,23 @@ public class Room {
                             tempNameStorage.add("a " + itnm);
                         }
                     }
-                    tempNameStorage.set(tempNameStorage.size()-1,"and " + (tempNameStorage.get(tempNameStorage.size()-1)));
+                    if (tempNameStorage.size()>1) {
+                        tempNameStorage.set(tempNameStorage.size()-1,"and " + (tempNameStorage.get(tempNameStorage.size()-1)));
+                    }
                     if (tempNameStorage.size()>2) {
                         if (furn.isContainer()) {
-                            iteml.add("in the " + furn.getName() + " there is " + String.join(", ",tempNameStorage));
+                            iteml.add("in the " + furn.getName() + " there is " + String.join(", ",tempNameStorage) + ".");
                         }
                         else {
-                            iteml.add("on the " + furn.getName() + " there is " + String.join(", ",tempNameStorage));
+                            iteml.add("on the " + furn.getName() + " there is " + String.join(", ",tempNameStorage) + ".");
                         }
                     }
                     else {
                         if (furn.isContainer()) {
-                            iteml.add("in the " + furn.getName() + " there is " + String.join(" ",tempNameStorage));
+                            iteml.add("in the " + furn.getName() + " there is " + String.join(" ",tempNameStorage) + ".");
                         }
                         else {
-                            iteml.add("on the " + furn.getName() + " there is " + String.join(" ",tempNameStorage));
+                            iteml.add("on the " + furn.getName() + " there is " + String.join(" ",tempNameStorage) + ".");
                         }
                     }
                 }

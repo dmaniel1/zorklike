@@ -1,8 +1,7 @@
 package zorklike;
 
-//make open command open things, make locked furniture not tell you whats in them, and get locked rooms working properly
-//search functions dont work for single words in furniture names (i.e. wooden table returns wooden table but table returns null) whatever man fuck this ion wanan fix that 
-//update: it is now fixed :D. only issue is uhhhhhhhh well the parser recognizes the words but the commands dont :/... still progress tho!!!!
+//i need to add subjective verbs (i.e. things like "door" where itll assume you mean the most recently mentioned door)
+//also i need to add and functionality to some of the commands ("grab the key and the axe" will grab the key as it is the first mentioned word but not the axe)
 
 //import statements
 import zorklike.Room;
@@ -157,7 +156,12 @@ public class Zorklike {
 							}
 						}
 						else {
-							System.out.println("That door is locked. Sorry!");
+							System.out.println("That door is locked. You need:");
+							int i=0;
+							for (String req : connect.getRequirements()) {
+								i++;
+								System.out.println("    " + boldBlueColor + i + ": " + resetFormatting + req);
+							}
 							return 0;
 						}
 					}
@@ -175,59 +179,6 @@ public class Zorklike {
 		//movement using directions
 		Command moveDirection = (String action, String object, String target) -> {
 			String act = action;
-			if (true) {
-				if (true) {
-					if (true) {
-						if (true) {
-							if (true) {
-								if (true) {
-									if (true) {
-										if (true) {
-											if (true) {
-												if (true) {
-													if (true) {
-														if (true) {
-															if (true) {
-																if (true&false&true|true&true^false!=true&!false^true){
-																	if (true) {
-																		if (true) {
-																			if (true) {
-																				if (true) {
-																					if (true){
-																						if (true) {
-																							if (true) {
-																								if (!!true&&true!=!true) {
-																									if (true) {
-																										if (true) {
-																											if (true^false) {
-																												if (true) {
-																													System.out.print("");
-																												}
-																											}
-																										}
-																									}
-																								}
-																							}
-																						}
-																					}
-																				} else if(true){}{}{}{}{};;;;;;;
-																			}
-																		}
-																	}
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
 			if (act.equals("foreward") || act.equals("forewards")) {
 				act = "front";
 			}
@@ -235,6 +186,7 @@ public class Zorklike {
 				act = "back";
 			}
 			for (Connection connect : curRoom[0].getConnections()) {
+				System.out.println(connect.getName());
 				if (connect.getSide().equals(act)) {
 					if (connect.isOpen()) {
 						String name = connect.getName();
@@ -251,14 +203,17 @@ public class Zorklike {
 						}
 					}
 					else {
-						System.out.println("That door is locked. Sorry!");
+						System.out.println("That door is locked. You need:");
+						int i=0;
+						for (String req : connect.getRequirements()) {
+							i++;
+							System.out.println("    " + boldBlueColor + i + ": " + resetFormatting + req);
+						}
+						return 0;
 					}
 				}
-				else {
-					System.out.println("You can't walk through the wall...");
-				}
 			}
-
+			System.out.println("You can't walk through a wall...");
 			return 0;
 		};
 		for (String command : Dictionary.directions) {
@@ -285,10 +240,15 @@ public class Zorklike {
 					}
 				}
 				else {
-					System.out.println("It's locked. No can do, bucakroo.");
+					System.out.println("It's locked. No can do, buckaroo.");
 				}
 			}
-			System.out.println("You can't pick up that.");
+			if (dictionary.searchItems(object)) {
+				System.out.println(redBackground + "There is no " + object + " in this room." + resetFormatting);
+			}
+			else {
+				System.out.println(redBackground + "Huh??? That doesn't exist dude... T-T" + resetFormatting);
+			}
 			return 0;
 		};
 		for (String cmd : Dictionary.obtaining) {
@@ -306,7 +266,6 @@ public class Zorklike {
 						}
 					}
 					System.out.println("That item isn't in your inventory... Sorry!");
-					
 				}
 				else if (target!=null) {
 					boolean checkRooms = dictionary.searchRooms(target.toLowerCase());
@@ -333,8 +292,16 @@ public class Zorklike {
 							if (containsExactWord(target,furn.getName())) {
 								for (Furniture furnr : curRoom[0].getFurnL()) {
 									if (containsExactWord(furn.getName(),furnr.getName())) {
-										System.out.println("You examine the " + furn.getName());
-										System.out.println("   " + furn.getExtendedDescription());
+										System.out.println("You examine the " + furn.getName() + ":");
+										System.out.println("    " + furn.getExtendedDescription());
+										if (!furn.isOpen()) {
+											System.out.println("    You need the following to open it:");
+											int i=0;
+											for (String req : furn.getRequirements()) {
+												i++;
+												System.out.println("        " + boldBlueColor + i + ": " + resetFormatting + req);
+											}
+										}
 										List<Item> citeml = furn.getItemL();
 										if (furn.isOpen()) {
 											if (citeml!=null) {
@@ -349,27 +316,39 @@ public class Zorklike {
                             							tempNameStorage.add("a " + itnm);
                         							}
 												}
-												tempNameStorage.set(tempNameStorage.size()-1,"and " + (tempNameStorage.get(tempNameStorage.size()-1)));
-												if (tempNameStorage.size()>2) {
+												if (tempNameStorage.size()>1) {
+													tempNameStorage.set(tempNameStorage.size()-1,"and " + (tempNameStorage.get(tempNameStorage.size()-1)));
+												}
+												else if (tempNameStorage.size()>2) {
 													if (furn.isContainer()) {
-														System.out.println("   Inside, there is " + String.join(", ",tempNameStorage) + ".");
+														System.out.println("    Inside, there is " + String.join(", ",tempNameStorage) + ".");
 													}
 													else {
-														System.out.println("   On top, there is " + String.join(", ",tempNameStorage) + ".");
+														System.out.println("    On top, there is " + String.join(", ",tempNameStorage) + ".");
 													}
 												}
 												else {
 													if (furn.isContainer()) {
-														System.out.println("   Inside, there is " + String.join(" ",tempNameStorage) + ".");
+														if (tempNameStorage.size()>0){
+															System.out.println("    Inside, there is " + String.join(" ",tempNameStorage) + ".");
+														}
+														else {
+															System.out.println("There is nothing inside.");
+														}
 													}
 													else {
-														System.out.println("   On top, there is " + String.join(" ",tempNameStorage) + ".");
+														if (tempNameStorage.size()>0) {
+															System.out.println("    On top, there is " + String.join(" ",tempNameStorage) + ".");
+														}
+														else {
+															System.out.println("There is nothing on it.");
+														}
 													}
 												}
 											}
 										}
 										else {
-											System.out.println("   You try to peer inside, but it is closed.");
+											System.out.println("    You try to peer inside, but it is closed.");
 										}
 										furnSuccess = true;
 									}
@@ -378,10 +357,10 @@ public class Zorklike {
 						}
 					}
 					if (checkRooms && !roomSuccess) {
-						System.out.println("Unfortunately, that room seems to not exist.");
+						System.out.println(redBackground + "Unfortunately, that room seems to not exist." + resetFormatting);
 					}
 					else if (checkFurniture && !furnSuccess) {
-						System.out.println("There is no " + target + " in this room.");
+						System.out.println(redBackground + "There is no " + target + " in this room." + resetFormatting);
 					}
 				}
 			}
@@ -485,7 +464,7 @@ public class Zorklike {
 										i++;
 										System.out.println("    " + boldBlueColor + i + ": " + resetFormatting + item);
 									}
-									System.out.print("Would you like to use these items to open the door? [y/n]");
+									System.out.print("Would you like to use these items to open the door? [y/n] ");
 									String input = scan.nextLine();
 									if (input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes")) {
 										for (String item : reqItems) {
@@ -549,20 +528,30 @@ public class Zorklike {
 											reqItems.add(item.getName());
 										}
 									}
-									if (reqItems.size()==0) {
-										System.out.println("You don't have the necessary items to open this " + furn.getName() + ". LOOOOOOOSERRRRRR!!!!");
+								}
+								if (reqItems.size()==0) {
+									System.out.println("You don't have the necessary items to open this " + furn.getName() + ". LOOOOOOOSERRRRRR!!!!");
+									return 0;
+								}
+								else {
+									System.out.println("The items in your inventory that match the requirements for opening this " + furn.getName() + " are:");
+									int i = 0;
+									for (String item : reqItems) {
+										i++;
+										System.out.println("    " + boldBlueColor + i + ": " + resetFormatting + item);
+									}
+									System.out.print("Would you like to use these items to open the " + furn.getName() + "? [y/n] ");
+									String input = scan.nextLine();
+									if (input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes")) {
+										for (String item : reqItems) {
+											furn.useItem(item);
+										}
+										System.out.println("You used the items. the " + furn.getName() + " is now open.");
 										return 0;
 									}
 									else {
-										System.out.println("The items in your inventory that match the requirements for opening this " + furn.getName() + " are:");
-										int i = 0;
-										for (String item : reqItems) {
-											i++;
-											System.out.println("    " + boldBlueColor + i + ": " + resetFormatting + item);
-										}
-										System.out.print("Would you like to use these items to open the " + furn.getName() + "? [y/n]");
-										String input = scan.nextLine();
-										//continue here
+										System.out.println("You don't use the items. The " + furn.getName() + " remains closed.");
+										return 0;
 									}
 								}
 							}
@@ -570,7 +559,6 @@ public class Zorklike {
 					}
 				}
 			}
-			
 			System.out.println("Sorry, I'm not quite sure what you're trying to open.");
 			return 0;
 		};
@@ -589,7 +577,7 @@ public class Zorklike {
 			// object (will not be room; if action is go or forward or any movement verb, it will use target not object)
 			String object = null;
 
-			System.out.print("> ");
+			System.out.print(greenColor + "> ");
 			String input = scan.nextLine();
 			// parser logic
 			ArrayList<String> tokenized = new ArrayList<String>(Arrays.asList(input.split(" ")));
@@ -720,10 +708,11 @@ public class Zorklike {
 				System.out.println("target: " + target);
 				System.out.println("object: " + object);
 				//command
+				System.out.print(resetFormatting);
 				commandHashMap.get(action).command(action,object,target);
 			}
 			else {
-				System.out.println("Sorry, not quite sure what \"" + input + "\" means. Try again?");
+				System.out.println(redBackground + "Sorry, not quite sure what \"" + input + "\" means. Try again?" + resetFormatting);
 			}
 		}
 	}
