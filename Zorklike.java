@@ -2,6 +2,7 @@ package zorklike;
 
 //i need to add subjective verbs (i.e. things like "door" where itll assume you mean the most recently mentioned door)
 //also i need to add and functionality to some of the commands ("grab the key and the axe" will grab the key as it is the first mentioned word but not the axe)
+//actually that should be working fine hold on im looking into it
 
 //import statements
 import zorklike.Room;
@@ -28,10 +29,12 @@ public class Zorklike {
     };
 	public static List<Item> inventory;
 	public static List<Room> rooms;
+	//abstract command method
 	@FunctionalInterface
 	public static interface Command {
-		int command(String action, String object, String target);
+		int command(String action, ArrayList<String> objects, ArrayList<String> targets);
 	}
+	//hashmap for commands
 	public static HashMap<String, Command> commandHashMap;
 	public static final String redBackground = "\033[41m";
 	public static final String resetFormatting = "\033[0m";
@@ -186,7 +189,6 @@ public class Zorklike {
 				act = "back";
 			}
 			for (Connection connect : curRoom[0].getConnections()) {
-				System.out.println(connect.getName());
 				if (connect.getSide().equals(act)) {
 					if (connect.isOpen()) {
 						String name = connect.getName();
@@ -393,7 +395,7 @@ public class Zorklike {
 			if target is openable and item is object, use the target to try and open the object
 			also add logic for already unlocked doors
 		*/
-		Command open = (String action, String object, String target) -> {
+		Command open = (String action, ArrayList<String> objects, ArrayList<String> targets) -> {
 			boolean itemIsTarget = dictionary.searchItems(target);
 			String openable;
 			String unlocker;
@@ -572,10 +574,10 @@ public class Zorklike {
 			String action = null;
 
 			// target (usually not items)
-			String target = null;
+			ArrayList<String> targets = new ArrayList<String>();
 
 			// object (will not be room; if action is go or forward or any movement verb, it will use target not object)
-			String object = null;
+			ArrayList<String> objects = new ArrayList<String>();
 
 			System.out.print(greenColor + "> ");
 			String input = scan.nextLine();
@@ -636,19 +638,17 @@ public class Zorklike {
 							objectList.add(item);
 						}
 					}
-					String targetListString = String.join(" ",targetList);
-					String objectListString = String.join(" ",objectList);
-					if (targetListString!=""){
-						target=targetListString.trim();
+					if (targetList.size() > 0) {
+						targets.addAll(targetList);
 					}
 					else {
-						target=null;
+						targets.clear();
 					}
-					if (objectListString!="") {
-						object = objectListString.trim();
+					if (objectList.size() > 0) {
+						objects.addAll(objectList);
 					}
 					else {
-						object=null;
+						objects.clear();
 					}
 				}
 				// if there is only an object or a target
@@ -663,13 +663,13 @@ public class Zorklike {
 					boolean checkFurniture = dictionary.searchFurniture(token.toLowerCase());
 
 					if (checkRooms) {
-						target = token.toLowerCase();
+						targets.add(token.toLowerCase());
 					}
 					else if (checkItems) {
-						object = token.toLowerCase();
+						object.add(token.toLowerCase());
 					}
 					else if (checkFurniture) {
-						target = token.toLowerCase();
+						targets.add(token.toLowerCase());
 					}
 					else if (token.equalsIgnoreCase("around")) {
 						action = "around";
@@ -693,23 +693,29 @@ public class Zorklike {
 						action = "inventory";
 					}
 					else if (token.equalsIgnoreCase("door")) {
-						target = "door";
+						targets.add("door");
 					}
 					else if (token.equalsIgnoreCase("backpack")) {
 						action = "backpack";
-						object = null;
-						target = null;
+						objects.clear();
+						targets.clear();
 					}
 				}
 
 				//response
 				// debug
 				System.out.println("action: " + action);
-				System.out.println("target: " + target);
-				System.out.println("object: " + object);
+				System.out.println("target(s):");
+				for (String target : targets) {
+					System.out.println(target);
+				}
+				System.out.println("object(s):");
+				for (String object : objects) {
+					System.out.println(object)
+				}
 				//command
 				System.out.print(resetFormatting);
-				commandHashMap.get(action).command(action,object,target);
+				commandHashMap.get(action).command(action,objects,targets);
 			}
 			else {
 				System.out.println(redBackground + "Sorry, not quite sure what \"" + input + "\" means. Try again?" + resetFormatting);
