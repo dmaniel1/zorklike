@@ -711,7 +711,7 @@ public class Zorklike {
 				}
 				System.out.println("object(s):");
 				for (String object : objects) {
-					System.out.println(object)
+					System.out.println(object);
 				}
 				//command
 				System.out.print(resetFormatting);
