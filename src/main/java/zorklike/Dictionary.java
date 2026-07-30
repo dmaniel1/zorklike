@@ -1,8 +1,5 @@
 package zorklike;
 
-import zorklike.Zorklike;
-import zorklike.Room;
-import zorklike.Item;
 import java.util.List;
 import java.util.ArrayList;
 

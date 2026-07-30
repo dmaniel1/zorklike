@@ -1,6 +1,5 @@
 package zorklike;
 
-import zorklike.Zorklike;
 import java.util.Iterator;
 
 
