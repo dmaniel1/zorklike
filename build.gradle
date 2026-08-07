@@ -16,3 +16,6 @@ java {
 application {
     mainClass = 'zorklike.Zorklike'
 }
+tasks.named('run') {
+	standardInput = System.in
+}
